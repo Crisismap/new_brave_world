@@ -1,4 +1,4 @@
-news_sources = {
+sources = {
                     #землетрясения                  
                     #'http://earthquake.usgs.gov/earthquakes/feed/atom/2.5/day':'earthquake',
                     'https://news.google.com/news/feeds?q=earthquake&output=rss':'earthquake_eng',
