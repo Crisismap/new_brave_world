@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 sources = {
                     #землетрясения                  
                     #'http://earthquake.usgs.gov/earthquakes/feed/atom/2.5/day':'earthquake',
