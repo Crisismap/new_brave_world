@@ -3,7 +3,7 @@ import datetime
 import os
 import re
 
-from flask import Flask
+from flask import Flask, flash, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
@@ -17,6 +17,7 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = bd_full
 app.config["SQLALCHEMY_COMMIT_ON_TEARDOWN"] = True
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SECRET_KEY"] = "Haskell"
 db = SQLAlchemy(app)
 
 
@@ -36,12 +37,15 @@ class News(db.Model):
     tag = db.relationship('Tag', backref = db.backref('news', lazy = "dynamic"))
 
 
-    def __init__(self, date, title, description, link, tag):
+    def __init__(self, title, description, link, tag, date= None):
         self.title = title
         self.description = description
-        self.date = date
         self.link = link
         self.tag = tag
+        if date:
+            self.date = date
+        else:
+            self.date = datetime.datetime.utcnow()
 
     def __repr__(self):
         return "<News %r>" % self.title
@@ -68,16 +72,28 @@ def insert_data():
             if tag_obj is None:
                 tag_obj = Tag(tag)
                 db.session.add(tag_obj)
-            n = News(*news, tag = tag_obj)
+            
+            n = News(title = news.title,
+                    description = news.description,
+                    link = news.link,
+                    tag = tag_obj)
             db.session.add(n)
         db.session.commit()
 
 #Some mock function for testing purposes
 def query():
-    for t in Tag.query.all():
-        for news in t.news.all():
-            print news.link
+    for n in News.query.all():
+        print n
+    
+    #for t in Tag.query.all():
+        #for news in t.news.all():
+           # print news.link
 
+
+@app.route("/<word>")
+def index(word):
+    news =  News.query.filter(News.title.ilike(u"%{word}%".format(word = word)))
+    return render_template("index.html", news = news)
 
 #db.drop_all()
 #db.create_all()

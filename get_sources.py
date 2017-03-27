@@ -8,7 +8,7 @@ from collections import namedtuple
 import datetime
 from sources import sources
 
-News = namedtuple("News", "date title description link")
+News = namedtuple("News", "title description link date")
 
 def custom_strip_tags(value):
     soup = bs(value);
@@ -32,7 +32,7 @@ def get_sources():
                 dt = datetime.datetime(*structTime[:6])
                 #str_date = time.strftime('%d/%m/%Y %H:%M:%S',entry.updated_parsed)
                 description = custom_strip_tags(entry.description)
-                news = News(dt, entry.title, description, entry.link)
+                news = News(entry.title, description, entry.link, dt)
                 yield tag, news
         except Exception as err:
             print err
