@@ -74,7 +74,6 @@ jupyter-console==4.1.1
 jupyter-core==4.1.0
 Keras==1.1.2
 Lasagne==0.1
-llvmlite==0.11.0
 locket==0.2.0
 lxml==3.6.0
 mahotas==1.4.3
