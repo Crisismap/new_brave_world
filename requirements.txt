@@ -94,7 +94,6 @@ packaging==16.8
 pandas==0.18.1
 pandas-ml==0.4.0
 partd==0.3.4
-path.py==0.0.0
 pathlib2==2.1.0
 patsy==0.4.1
 pdfminer==20140328
