@@ -48,7 +48,6 @@ Flask-SQLAlchemy==2.2
 funcsigs==1.0.2
 functools32==3.2.3.post2
 futures==3.0.5
-gensim==1.0.1
 geocoder==1.21.2
 geopy==1.11.0
 gevent==1.1.1
@@ -79,9 +78,7 @@ lxml==3.6.0
 mahotas==1.4.3
 Mako==1.0.6
 MarkupSafe==0.23
-matplotlib==1.5.1
 memory-profiler==0.41
-milk==0.6.1
 mistune==0.7.2
 mpmath==0.19
 multipledispatch==0.4.8
