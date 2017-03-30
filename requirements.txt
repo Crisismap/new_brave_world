@@ -39,7 +39,6 @@ docutils==0.12
 enum34==1.1.6
 et-xmlfile==1.0.1
 fastcache==1.0.2
-fastcluster==1.1.21
 feedparser==5.2.1
 Flask==0.11.1
 Flask-Cors==2.1.2
