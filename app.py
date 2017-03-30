@@ -99,6 +99,5 @@ def index(word):
 #db.create_all()
 
 #insert_data()
-#query()
 
 

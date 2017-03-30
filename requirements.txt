@@ -1,7 +1,5 @@
 alabaster==0.7.8
 alembic==0.9.1
-anaconda-client==1.4.0
-anaconda-navigator==1.2.1
 appdirs==1.4.0
 appnope==0.1.0
 appscript==1.0.1
