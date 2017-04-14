@@ -94,7 +94,7 @@ def b(txt, word):
     return txt.replace(word, u"<b>{word}</b>".format(word = word))
 
 @app.route("/<word>")
-def index(word):
+def word(word):
     news =  News.query.filter(News.title.like(u"%{word}%".format(word = word)))
     #news =  News.query.filter(or_ (News.title.like(u"%{word}%".format(word = word)),
     #                               News.title.like(u"%{word}%".format(word = word.lower())),
@@ -103,6 +103,15 @@ def index(word):
     titles = [b(n.title, word) for n in news]
     ns = zip(news, titles)
     return render_template("index.html", news = news, titles = titles, ns = ns)
+
+
+@app.route("/")
+def index():
+    return "Hello"
+
+db.drop_all()
+db.create_all()
+insert_data()
 
 port = int(os.environ.get('PORT', 5000))
 app.run(host='0.0.0.0', port=port)
