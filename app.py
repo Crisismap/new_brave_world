@@ -103,5 +103,6 @@ def index(word):
     ns = zip(news, titles)
     return render_template("index.html", news = news, titles = titles, ns = ns)
 
-
+port = int(os.environ.get('PORT', 5000))
+app.run(host='0.0.0.0', port=port)
 
