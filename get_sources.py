@@ -21,9 +21,9 @@ def custom_strip_tags(value):
     
     return unicode(result)
 
-def get_sources():
+def get_sources(limit = 1):
     for i, (url, tag) in enumerate(sources.items()):
-        if i > 1:
+        if i > limit:
             break
         try:
             lenta = feedparser.parse(url)

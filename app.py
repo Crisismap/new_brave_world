@@ -4,8 +4,9 @@ import os
 import re
 
 from flask import Flask, flash, render_template
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy, or_
 from flask_migrate import Migrate
+from flask_bootstrap import Bootstrap
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 SQLITE_PREFIX = "sqlite:///" 
@@ -19,7 +20,7 @@ app.config["SQLALCHEMY_COMMIT_ON_TEARDOWN"] = True
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = "Haskell"
 db = SQLAlchemy(app)
-
+Bootstrap(app)
 
 #with flask-migrate, you can update db schema with such commands:
 #export FLASK_APP=app.py; flask db init; flask db migrate; flask db upgrade
@@ -66,7 +67,7 @@ class Tag(db.Model):
 #the function is limited by number of items returned by get_sources
 def insert_data():
     from get_sources import get_sources
-    for tag, news in get_sources():
+    for tag, news in get_sources(limit = 5):
         with db.session.no_autoflush:
             tag_obj = Tag.query.filter_by(name = tag).first()
             if tag_obj is None:
@@ -89,15 +90,18 @@ def query():
         #for news in t.news.all():
            # print news.link
 
+def b(txt, word):
+    return txt.replace(word, u"<b>{word}</b>".format(word = word))
 
 @app.route("/<word>")
 def index(word):
-    news =  News.query.filter(News.title.ilike(u"%{word}%".format(word = word)))
-    return render_template("index.html", news = news)
+    news =  News.query.filter(or_ (News.title.like(u"%{word}%".format(word = word)),
+                                   News.title.like(u"%{word}%".format(word = word.lower())),
+                                   News.title.like(u"%{word}%".format(word = word.capitalize()))
+                            ))
+    titles = [b(n.title, word) for n in news]
+    ns = zip(news, titles)
+    return render_template("index.html", news = news, titles = titles, ns = ns)
 
-#db.drop_all()
-#db.create_all()
-
-#insert_data()
 
 
