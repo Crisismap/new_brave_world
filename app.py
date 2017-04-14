@@ -4,7 +4,7 @@ import os
 import re
 
 from flask import Flask, flash, render_template
-from flask_sqlalchemy import SQLAlchemy, or_
+from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_bootstrap import Bootstrap
 
@@ -95,10 +95,11 @@ def b(txt, word):
 
 @app.route("/<word>")
 def index(word):
-    news =  News.query.filter(or_ (News.title.like(u"%{word}%".format(word = word)),
-                                   News.title.like(u"%{word}%".format(word = word.lower())),
-                                   News.title.like(u"%{word}%".format(word = word.capitalize()))
-                            ))
+    news =  News.query.filter(News.title.like(u"%{word}%".format(word = word)))
+    #news =  News.query.filter(or_ (News.title.like(u"%{word}%".format(word = word)),
+    #                               News.title.like(u"%{word}%".format(word = word.lower())),
+    #                               News.title.like(u"%{word}%".format(word = word.capitalize()))
+    #                        ))
     titles = [b(n.title, word) for n in news]
     ns = zip(news, titles)
     return render_template("index.html", news = news, titles = titles, ns = ns)
