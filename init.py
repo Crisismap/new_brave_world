@@ -19,14 +19,14 @@ def job():
 
 def main():
     init()
-    #schedule.every().day.at("01:00").do(job)
-    schedule.every(1).minutes.do(job)
+    schedule.every().day.at("01:00").do(job)
+    #schedule.every(1).minutes.do(job)
     while True:
         schedule.run_pending()
 
 if __name__ == "__main__":
-    check_geocoding()
+    #check_geocoding()
     #check_toponyms()
-    #main()
+    main()
 
 
