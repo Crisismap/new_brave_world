@@ -1,5 +1,5 @@
 from app import db
-from db_funcs import insert_data, add_toponyms, check_toponyms, geocode_toponyms, check_geocoding
+from db_funcs import insert_data, add_toponyms, add_locs, check_toponyms, geocode_toponyms, check_geocoding
 #from celery import Celery
 import schedule
 import sys
@@ -13,6 +13,7 @@ def update():
     insert_data(2)
     add_toponyms()
     geocode_toponyms()
+    add_locs()
 
 def job():
     update()
@@ -27,6 +28,9 @@ def main():
 if __name__ == "__main__":
     #check_geocoding()
     #check_toponyms()
+    #update()
     main()
+    #init()
+    
 
 

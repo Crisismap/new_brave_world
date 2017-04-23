@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import geocoder
 import json
 import hashlib
@@ -50,7 +51,7 @@ def add_toponyms():
     db.session.commit()
         
 def geocode_toponyms():
-    for t in Toponyms.query.filter_by(loc = None).limit(10):
+    for t in Toponyms.query.filter_by(loc = None).limit(2000):
         logging.debug(t.name)
         result = geocoder.osm(t.name)
         box = json.dumps(result.bbox)
@@ -61,16 +62,59 @@ def geocode_toponyms():
             db.session.add(loc_obj)
         t.loc =  loc_obj
     db.session.commit()
+
+def get_coords(loc):
+    if loc:
+        geojson = json.loads(loc.geojson)
+        coords = geojson.get("geometry", {}).get("coordinates")
+        if coords:
+            return coords[::-1]
+
+def get_country(loc):
+    if loc:
+        geojson = json.loads(loc.geojson)
+        country= geojson.get("properties", {}).get("country")
+        return country
+
+
+def add_locs():
+    our_countries = {u"Україна", u'Россия'}
+    #for n in News.query.filter_by(localization_added = False):
+    for n in News.query.all():
+        for toponym in n.toponyms:
+                loc = toponym.loc
+                if loc:
+                    coords = get_coords(loc)
+                    country = get_country(loc)
+                    if coords and country in our_countries:
+                        n.loc = loc
+                        break
+    n.localization_added = True
+    db.session.commit()
  
+
+
 def check_geocoding():
     i = 0
+    our_countries = {u"Україна", u'Россия'}
+    countries = []
     for t in Toponyms.query.all():
         if t.loc is not None:
-            print i
-            print t.name
-            print t.loc.box
-            print t.loc.geojson
+
+            #print i
+            #print t.name
+            #print t.loc.box
+            #print t.loc.geojson
+            geojson = json.loads(t.loc.geojson)
+            country= geojson.get("properties", {}).get("country")
+            countries.append(country)
+            coords= geojson.get("geometry", {}).get("coordinates")
+            if country in our_countries:
+                print  i
+                print  t.name
             i +=1
+    #for c in set( countries):
+    #    print c
 
 def check_toponyms():
     for n in News.query.filter_by(toponyms_added = True):

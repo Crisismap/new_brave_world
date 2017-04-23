@@ -25,13 +25,12 @@
 
 
 {%block page_content%}
-{%for n, t, d in ns%}
+{%for n, t, d, coords in ns%}
  <div class = "news">
  <div class = "news_date">{{n.date}}</div>
  <div class = "news_title">{{t|safe}}</div>
  <a href = "{{n.link.split("url=")[1]}}">{{d|safe}}"</a>
  </div>  
-
 {%endfor%}
 {%endblock%}
 
