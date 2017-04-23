@@ -10,7 +10,7 @@ def init():
     db.create_all()
 
 def update():
-    insert_data(2)
+    insert_data(20)
     add_toponyms()
     geocode_toponyms()
     add_locs()
