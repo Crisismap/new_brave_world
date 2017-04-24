@@ -36,7 +36,7 @@ def main(shape, num_epochs=100):
     engine = classifier.Engine(input_var, data.build_mlp, shape, target_var = target_var)
 
     engine.fit(X_train, y_train, num_epochs)
-    np.savez(os.path.join(cwd,'models/model-rus.npz'), *lasagne.layers.get_all_param_values(engine.network))
+    np.savez(os.path.join(cwd,'models/model-rus.npz') , *lasagne.layers.get_all_param_values(engine.network))
 
     print 'model saved'
 

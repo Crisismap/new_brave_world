@@ -30,7 +30,7 @@ eng_model = os.path.join(cwd,'models/model-eng.npz')
 rus_model = os.path.join(cwd,'models/model-rus.npz')
 input_var = T.dtensor3('inputs')
 
-# building nets for russian and english
+#   building nets for russian and english
 ru_engine = Engine(input_var, data.build_mlp, ((None,3,201), 300),  model = rus_model)
 eng_engine = Engine(input_var, data.build_mlp, ((None, 3, 101),150), model = eng_model)
 
