@@ -42,7 +42,7 @@ class Engine(object):
                     param_values = [f['arr_%d' % i] for i in range(len(f.files))]
                     lasagne.layers.set_all_param_values(self.network, param_values)
             except:
-                raise  NetworkException('network and model do not match!')
+                 raise  NetworkException('network and model do not match!')
 
 
 

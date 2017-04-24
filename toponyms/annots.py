@@ -47,7 +47,7 @@ class AnnotationSet(set):
 def setlabels(words, annotations):
     labels = []
     for annotation in annotations:
-        labels.append(' '.join(words[i] for i in xrange(annotation.left, annotation.right + 1)))#.encode('utf-8'))
+         labels.append(' '.join(words[i] for i in xrange(annotation.left, annotation.right + 1)))#.encode('utf-8'))
     return labels
 
 def setAnnotations(y,  CLASSES, exactness = 'strict'):

@@ -84,7 +84,7 @@ def mklsts (CORPUS, files, winsize,  word2vec, lang = 'rus'):
     return Ns,  WORDS, np.asarray(CLS, dtype = 'int32')
 
 
-def get_tokens(text): #split to tokens
+def  get_tokens(text): #split to tokens
     text = re.sub(ur'&quot;', ur'"', text)
     text = re.sub(ur'([ ^$][йцукенгшщзхъфывапролджэячсмитьбю0-9a-z]+)([\-])', ur'\1 \2 ', text)
     text = re.sub(ur'([\-])([йцукенгшщзхъфывапролджэячсмитьбю0-9a-z]+)', ur' \1 \2', text)
