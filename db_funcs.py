@@ -8,6 +8,8 @@ import unicodedata
 from app import db
 from db_models import *
 
+from toponyms.top import * #extract_toponyms
+
 def hash(string):
     return hashlib.sha1(string.encode('utf8')).hexdigest()
 
@@ -31,12 +33,14 @@ def insert_data(limit = 5):
     db.session.commit()
 
 #mock function, to be replaced by a real one 
-def extract_toponyms(news):
-    #translation table for removing punctuation
-    tbl = dict.fromkeys(i for i in range(sys.maxunicode) if unicodedata.category(unichr(i)).startswith(u'p'))
-    for word in news.split():
-          if word[0].isupper():
-             yield  word.translate(tbl)
+#def extract_toponyms(news):
+#    #translation table for removing punctuation
+#    for word in news.split():
+#          if word[0].isupper():
+#             yield  word.translate(tbl)
+
+
+
 
 def add_toponyms():
     for n in News.query.filter_by(toponyms_added = False):
@@ -46,7 +50,7 @@ def add_toponyms():
                 toponym_obj = Toponyms(toponym)
                 db.session.add(toponym_obj)
             n.toponyms.append( toponym_obj)
-    n.toponyms_added = True
+        n.toponyms_added = True
     db.session.commit()
         
 def geocode_toponyms():
