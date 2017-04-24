@@ -25,7 +25,9 @@ class News(db.Model):
                                 secondary = news2toponyms, 
                                 backref = db.backref("news", lazy = "dynamic"),
                                 lazy = "dynamic")
-
+    
+    loc_id = db.Column(db.Integer, db.ForeignKey('locs.id'))
+    loc = db.relationship("Localization", backref = db.backref("news", lazy = "dynamic"))
 
 
     def __init__(self, title, description, link, tag, hash, date= None):
@@ -76,6 +78,7 @@ class Localization(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     box = db.Column(db.String, unique = True) # '{"northeast": [55.8066899802915, 37.6366020802915], "southwest": [55.8039920197085, 37.6339041197085]}'
     geojson = db.Column(db.Text)
+    #coords = db.Column(db.String)
     
     def __init__(self, box, geojson):
         self.box = box
