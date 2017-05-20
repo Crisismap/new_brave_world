@@ -48,10 +48,14 @@ def eng_vector(word, model):
 
 def neurons(words, winsize, model, lang = 'rus'):
     l = len(words)
+
     words = [u'<fullstop>'] * winsize + words[:-1] + [u'<fullstop>'] * winsize
     if lang == 'rus':
+
         ns = np.zeros((l - 1, 3, (model.vector_size * 2 + 1)))
         for i in xrange(winsize, l + winsize - 1):
+
+
             ns[i - winsize, :, :] = np.vstack((np.mean(tuple(rus_vector(_, model) for _ in  words[i - winsize: i]), axis = 0), rus_vector(words[i], model),
                                                        np.mean(tuple(rus_vector(_, model) for _ in  words[i + 1: i + winsize + 1]), axis = 0)))
     else:

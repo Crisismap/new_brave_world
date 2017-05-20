@@ -38,10 +38,10 @@ def extract_toponyms(text):
 
     words = data.get_tokens(text)
     if iseng(text):
-        nn = data.neurons(words, 2, eng_word2vec_model, lang = 'eng')
+        nn = data.neurons(words, 1, eng_word2vec_model, lang = 'eng')
         pred = eng_engine.predict(nn)
     else:
-        nn = data.neurons(words, 2, rus_word2vec_model)
+        nn = data.neurons(words, 1, rus_word2vec_model)
         pred = ru_engine.predict(nn)
 
     predannotations = annots.setAnnotations(pred,  {1: 'Location'})  # list of annotations

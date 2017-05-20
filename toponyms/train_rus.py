@@ -13,8 +13,9 @@ import classifier
 morph = pymorphy2.MorphAnalyzer()
 np.set_printoptions(threshold='nan')
 
+
 CORPUS = 'training_sets/CF-rus-hyphen-plus'
-winsize = 2
+winsize = 1
 modelfile = 'word2vec/100-sg-hs-joint.model'
 word2vec_model = word2vec.Word2Vec.load_word2vec_format(modelfile, binary=False)
 
@@ -43,4 +44,4 @@ def main(shape, num_epochs=100):
 
 
 if __name__ == '__main__':
-    main(((None,3,word2vec_model.vector_size * 2 + 1), 300), num_epochs = 50)
+    main(((None,3,word2vec_model.vector_size * 2 + 1), 300), num_epochs = 100)
