@@ -1,7 +1,7 @@
 #-*- coding: UTF-8 -*-
 
 import os
-from gensim.models import word2vec
+from gensim.models import KeyedVectors
 
 import annots
 
@@ -21,9 +21,9 @@ def iseng(text):
 g = geocoder.google('Mountain View, CA')
 
 #word2vec models
-eng_word2vec_model = word2vec.Word2Vec.load_word2vec_format(os.path.join(cwd, 'word2vec/wiki-100.model'),
+eng_word2vec_model = KeyedVectors.load_word2vec_format(os.path.join(cwd, 'word2vec/wiki-100.model'),
                                                             binary=False)
-rus_word2vec_model = word2vec.Word2Vec.load_word2vec_format(os.path.join(cwd,'word2vec/100-sg-hs-joint.model'),
+rus_word2vec_model = KeyedVectors.load_word2vec_format(os.path.join(cwd,'word2vec/100-sg-hs-joint.model'),
                                                             binary=False)
 # trained models
 eng_model = os.path.join(cwd,'models/model-eng.npz')

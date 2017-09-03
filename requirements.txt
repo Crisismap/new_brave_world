@@ -21,6 +21,7 @@ MarkupSafe==1.0
 matplotlib==2.0.2
 networkx==2.0
 nltk==3.2.4
+git+https://github.com/Lasagne/Lasagne.git@359ea1b
 numpy==1.13.1
 orderedset==2.0
 pandas==0.20.3
@@ -41,3 +42,11 @@ subprocess32==3.2.7
 Theano==0.9.0
 urllib3==1.22
 Werkzeug==0.12.2
+git+https://github.com/Theano/Theano.git@814dc05
+urllib3==1.22
+flask==0.12.2
+Flask-SQLAlchemy==2.2
+Flask-Migrate==2.1.1
+flask-bootstrap==3.3.7.1
+graphviz==0.8
+pydot_ng==1.0.0
