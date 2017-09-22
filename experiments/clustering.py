@@ -114,7 +114,7 @@ thresh = 0.2
 #clusters = hcluster.fclusterdata(cartesian_coordinates, thresh, metric="cosine", criterion='distance', method = 'complete')
 
 
-clusters = hcluster.fclusterdata(cartesian_coordinates, thresh, metric="euclidean", criterion='distance', method = 'weighted')
+clusters = hcluster.fclusterdata(cartesian_coordinates, thresh, criterion='distance', method = 'weighted', metric="euclidean")
 
 
 import csv
