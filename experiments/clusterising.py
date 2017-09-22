@@ -49,16 +49,28 @@ df = df.ix[np.random.permutation(df.index)]
 df = df[:1000]
 #print df
 
-results = []
+results, lats, longs = [], [],[]
 for i, doc in enumerate(df.iterrows()):
     try:
         result = dict(text = df.iloc[i].Title + ' ' + df.iloc[i].Description, id = i, point = (float(df.iloc[i].lat), float(df.iloc[i].long)))
+        lats.append(float(df.iloc[i].lat))
+        longs.append(float(df.iloc[i].long))
         results.append(result)
 
     except:
         print 'except'
 
+#coords =
 
+from math import cos, sin, radians
+def cartesian(lat, long):
+    return (cos(radians(lat)) * cos(radians(long)), cos(radians(lat)) * sin(radians(long)), sin(radians(lat)))
+
+cartesian_vectorize = np.vectorize(cartesian)
+
+cartesian_coordinates = [(x,y,z) for x,y,z in zip(*cartesian_vectorize(lats, longs))]
+print cartesian_coordinates
+#np.apply_along_axis(cartesian,0, (np.ndarray(lats), np.ndarray(longs)))
 
 def distance(top0,top1):
 
@@ -82,10 +94,9 @@ for i,r0 in enumerate(results):
             #except:
             #    distance_matrix[i,j] = 1000
 
-print distance_matrix.shape
-print len(points)
 
 
+"""
 X_embedded = tsne.fit_transform(distance_matrix)
 print X_embedded.shape
 Y = np.max(X_embedded[:,1])
@@ -93,11 +104,18 @@ X = np.max(X_embedded[:,0])
 y = np.min(X_embedded[:,1])
 x = np.min(X_embedded[:,0])
 
-import scipy.cluster.hierarchy as hcluster
-data_to_cluster = np.asarray([[X_embedded[i,0], X_embedded[i,1]] for i in xrange(X_embedded.shape[0])])
 
-thresh = 3
-clusters = hcluster.fclusterdata(data_to_cluster, thresh, criterion="distance")
+data_to_cluster = np.asarray([[X_embedded[i,0], X_embedded[i,1]] for i in xrange(X_embedded.shape[0])])
+"""
+import scipy.cluster.hierarchy as hcluster
+
+thresh = 0.2
+#clusters = hcluster.fclusterdata(data_to_cluster, thresh, criterion="distance")
+#clusters = hcluster.fclusterdata(cartesian_coordinates, thresh, metric="cosine", criterion='distance', method = 'complete')
+
+
+clusters = hcluster.fclusterdata(cartesian_coordinates, thresh, metric="euclidean", criterion='distance', method = 'weighted')
+
 
 import csv
 rs = [_ for _ in zip(*sorted(zip(results,  clusters), key=lambda x: x[1]))]
@@ -106,7 +124,7 @@ with open('clusters.csv', 'w') as fout:
         writer = csv.writer(fout, delimiter = '\t')
         for text, label in zip(texts_sort, y_sort):
 
-            writer.writerow([text['text'] , str(label) ,text['point']])
+            writer.writerow([text['text'] , str(label) ,text['point'], str(cartesian(text['point'][0], text['point'][1]))])
 
 
 #print X,Y
@@ -115,6 +133,18 @@ with open('clusters.csv', 'w') as fout:
 
 
 import matplotlib.pyplot as plt
+tsne_vec = TSNE(n_components=2, metric='cosine')
+
+X_embedded = tsne.fit_transform(distance_matrix)
+print X_embedded.shape
+Y = np.max(X_embedded[:,1])
+X = np.max(X_embedded[:,0])
+y = np.min(X_embedded[:,1])
+x = np.min(X_embedded[:,0])
+
+
+
+
 plt.plot(X_embedded[:,0], X_embedded[:,1], 'ro')
 plt.axis([x-2, X + 2, y-2, Y + 2])
 #for i,txt in enumerate(points):
@@ -125,6 +155,7 @@ for i,txt in enumerate(clusters):
     plt.annotate(txt, (X_embedded[i,0], X_embedded[i,1]))
     #plt.annotate(txt, (X_embedded[-6:,0][i], X_embedded[-6:,1][i]))
 plt.show()
+"""
 
 plt.plot(X_embedded[:,0], X_embedded[:,1], 'ro')
 plt.axis([x-2, X + 2, y-2, Y + 2])
@@ -138,7 +169,6 @@ for i,txt in enumerate(points):
 plt.show()
 
 
-"""
 
 import codecs
 from gensim.models.doc2vec import Doc2Vec
