@@ -1,5 +1,6 @@
 #-*- coding: UTF-8 -*-
 
+import pdb
 import os
 from math import cos, sin, radians
 from argparse import ArgumentParser
@@ -8,6 +9,7 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame
 import scipy.cluster.hierarchy as hcluster
+from sklearn.cluster import DBSCAN
 
 def handle_args():
     parser = ArgumentParser()
@@ -26,16 +28,26 @@ def main():
     df = pd.read_csv(fname, sep = ';', encoding = "utf8")
     df = df.ix[np.random.permutation(df.index)]
     df = df[:1000]
-    df["text"] = df.Title.map(unicode) + df.Description.map(unicode)
+    #df["text"] = df.Title.map(unicode) + df.Description.map(unicode)
 
     cartesian_coordinates = [(x,y,z) for x,y,z in zip(*cartesian_vectorize(df.lat, df.long))]
+    for dim, ind in zip(("x", "y", "z"), (0, 1, 2)):
+        df[dim] = [elem[ind] for elem in cartesian_coordinates]
     thresh = 0.2
-    df["clusters"] = hcluster.fclusterdata(cartesian_coordinates, thresh, metric="euclidean", criterion='distance', method = 'weighted')
+    model= DBSCAN(eps = 0.1)
+    cols = ["0", "1", "2", "x", "y", "z"]
+    from sklearn.preprocessing import StandardScaler
+    scaler = StandardScaler()
+    data = scaler.fit_transform(df.fillna(0)[cols])
+    df["clusters"] =  model.fit_predict(data)
+    #df["clusters"] = hcluster.fclusterdata(data, thresh, metric="euclidean", criterion='distance', method = 'weighted')
     df.sort_values("clusters", inplace = True)
 
     now = dt.datetime.now().isoformat().replace(":", "_")
-    result_name = "_".join([os.path.splitext(fname)[0], now , "result.txt"])
-    columns = ["clusters", "phrases", "lat", "long", "pub_date", "type", "Title", "Description", "text"]
+    result_name = "_".join([os.path.splitext(fname)[0], now , "result.csv"])
+    #columns = ["clusters", "lat", "long"]
+    #"phrases", "lat", "long", "pub_date", "type", "Title", "Description", "text"]
+    columns = ["clusters", "lat", "long", "Title", "Description"]
     df[columns].to_csv(result_name, encoding = "utf8", sep = "\t", index = False)
 
 if __name__ == "__main__":
