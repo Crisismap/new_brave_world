@@ -10,6 +10,7 @@ import pandas as pd
 from pandas import DataFrame
 import scipy.cluster.hierarchy as hcluster
 from sklearn.cluster import DBSCAN
+from sklearn.preprocessing import StandardScaler
 
 def handle_args():
     parser = ArgumentParser()
@@ -36,11 +37,10 @@ def main():
     thresh = 0.2
     model= DBSCAN(eps = 0.1)
     cols = ["0", "1", "2", "x", "y", "z"]
-    from sklearn.preprocessing import StandardScaler
     scaler = StandardScaler()
     data = scaler.fit_transform(df.fillna(0)[cols])
-    df["clusters"] =  model.fit_predict(data)
-    #df["clusters"] = hcluster.fclusterdata(data, thresh, metric="euclidean", criterion='distance', method = 'weighted')
+    #df["clusters"] =  model.fit_predict(data)
+    df["clusters"] = hcluster.fclusterdata(data, thresh, metric="euclidean", criterion='distance', method = 'weighted')
     df.sort_values("clusters", inplace = True)
 
     now = dt.datetime.now().isoformat().replace(":", "_")
