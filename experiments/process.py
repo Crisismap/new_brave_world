@@ -1,4 +1,6 @@
+import os
 import pdb
+
 import gensim
 import pandas as pd
 import numpy as np
@@ -54,6 +56,10 @@ result = svd_model.fit_transform(result)
 
 model = AffinityPropagation()
 df["clusters"] = model.fit_predict(result)
+df.sort_values("clusters", inplace = True)
+#now = dt.datetime.now().isoformat().replace(":", "_")
+now = "svd_affinity"
+result_name = "_".join([os.path.splitext(fname)[0], now , "result.csv"])
 columns = ["clusters", "lat", "long", "Title", "Description"]
 df[columns].to_csv(result_name, encoding = "utf8", sep = "\t", index = False)
 #cluster_sizes = df.groupby("clusters").size()
