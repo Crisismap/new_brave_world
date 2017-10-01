@@ -7,12 +7,11 @@ from argparse import ArgumentParser
 from nltk.tokenize import word_tokenize
 from nltk.stem.snowball import RussianStemmer
 from pandas import DataFrame
-
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.cluster import KMeans
 import scipy.cluster.hierarchy as hcluster
-from sklearn.cluster import DBSCAN
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.cluster import KMeans, DBSCAN, AffinityPropagation
 from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA, TruncatedSVD
 
 def handle_args():
     parser = ArgumentParser()
@@ -48,8 +47,13 @@ tfidf_matrix  =  stem_vectorizer.fit_transform(df.text)
 from make_clusters import  cartesian_vectorize
 coords = np.column_stack(cartesian_vectorize(df.lat, df.long))
 
-result = np.hstack((tfidf_matrix.toarray(), coords))
-kmodel = KMeans()
-df["clusters"] = kmodel.fit_predict(result)
+result = np.hstack((tfidf_matrix.toarray(), coords*20))
 
-print df.clusters
+svd_model = TruncatedSVD()
+result = svd_model.fit_transform(result)
+
+model = AffinityPropagation()
+df["clusters"] = model.fit_predict(result)
+
+#print cluster_sizes[cluster_sizes>3].index
+#print df[df.clusters.isin(cluster_sizes[cluster_sizes>3].index)].sort("clusters")
