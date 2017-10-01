@@ -55,5 +55,6 @@ result = svd_model.fit_transform(result)
 model = AffinityPropagation()
 df["clusters"] = model.fit_predict(result)
 
+#cluster_sizes = df.groupby("clusters").size()
 #print cluster_sizes[cluster_sizes>3].index
 #print df[df.clusters.isin(cluster_sizes[cluster_sizes>3].index)].sort("clusters")
