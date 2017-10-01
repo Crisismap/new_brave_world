@@ -42,23 +42,23 @@ stem_vectorizer = TfidfVectorizer(analyzer=stemmed_words)
 
 args = handle_args()
 fname = args.fname
-df = make_df(fname, n = 300)
+df = make_df(fname, n = 1000)
 
 tfidf_matrix  =  stem_vectorizer.fit_transform(df.text)
 
 from make_clusters import  cartesian_vectorize
 coords = np.column_stack(cartesian_vectorize(df.lat, df.long))
 
-result = np.hstack((tfidf_matrix.toarray(), coords*20))
+result = np.hstack((tfidf_matrix.toarray(), coords*2))
 
-svd_model = TruncatedSVD()
+svd_model = TruncatedSVD(n_components = 100)
 result = svd_model.fit_transform(result)
 
 model = AffinityPropagation()
 df["clusters"] = model.fit_predict(result)
 df.sort_values("clusters", inplace = True)
 #now = dt.datetime.now().isoformat().replace(":", "_")
-now = "svd_affinity"
+now = "coords_x2_svd_100_components_affinity"
 result_name = "_".join([os.path.splitext(fname)[0], now , "result.csv"])
 columns = ["clusters", "lat", "long", "Title", "Description"]
 df[columns].to_csv(result_name, encoding = "utf8", sep = "\t", index = False)
