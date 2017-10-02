@@ -12,3 +12,9 @@ Make sure Docker is installed, then run the following command:
 ```
 docker-compose up
 ```
+
+## Rebuild image after making changes
+
+```
+docker-compose build
+```
