@@ -39,14 +39,10 @@ six==1.10.0
 sklearn==0.0
 smart-open==1.5.3
 subprocess32==3.2.7
-Theano==0.9.0
 urllib3==1.22
 Werkzeug==0.12.2
 git+https://github.com/Theano/Theano.git@814dc05
-urllib3==1.22
-flask==0.12.2
 Flask-SQLAlchemy==2.2
 Flask-Migrate==2.1.1
 flask-bootstrap==3.3.7.1
-graphviz==0.8
 pydot_ng==1.0.0
