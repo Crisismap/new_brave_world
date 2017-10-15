@@ -34,18 +34,20 @@ def iscap(word):
 
 def rus_vector(word, model):
     if normal_form(word)  in model.vocab and grammar_token(word) in model.vocab:
-        return np.hstack((model[normal_form(word)],model[grammar_token(word)], [iscap(word),]))
+
+        return list(model[normal_form(word)]) + list(model[grammar_token(word)]) + [iscap(word)]
     elif grammar_token(word) in model.vocab:
-        return np.hstack((model['unk'], model[grammar_token(word)], [iscap(word),]))
+        return list(model['unk']) + list(model[grammar_token(word)]) +  [iscap(word)]
     else:
-        return np.hstack((model['unk'], np.zeros((model.vector_size, )), [iscap(word),]))
+        return list(model['unk']) + [0] * model.vector_size + [iscap(word)]
 
 def eng_vector(word, model):
     if word.lower()  in model.vocab :
-        return np.concatenate((model[word.lower()], [iscap(word),]))
+        return list(model[word.lower()]) +  [iscap(word)]
     else:
-        return np.concatenate((model['unk'], [iscap(word),]))
+        return list(model['unk']) + [iscap(word)]
 
+"""
 def neurons(words, winsize, model, lang = 'rus'):
     l = len(words)
 
@@ -64,13 +66,39 @@ def neurons(words, winsize, model, lang = 'rus'):
             ns[i - winsize, :, :] = np.vstack((np.mean(tuple(eng_vector(_, model) for _ in  words[i - winsize: i]), axis = 0), eng_vector(words[i], model),
                                                        np.mean(tuple(eng_vector(_, model) for _ in  words[i + 1: i + winsize + 1]), axis = 0)))
     return ns
+"""
+def mean(listoflists):
+    #l = len(listoflists[0])
 
+    #s  = [sum (_[i] for _ in listoflists) / l for i in xrange(l) ]
+    #return s
+    return listoflists[0]
+
+
+def neurons(words, winsize, model, lang = 'rus'):
+    words = [u'<fullstop>'] * winsize + words[:-1] + [u'<fullstop>'] * winsize
+    ns = []
+    if lang == 'rus':
+        for j, word in enumerate(words[winsize:-winsize]):
+            i = j + winsize
+
+            ns.append(mean([rus_vector(_, model) for _ in words[i - winsize: i]]) + rus_vector(word, model)
+                      + mean([rus_vector(_, model) for _ in  words[i + 1: i + winsize + 1]]))
+    else:
+        for j, word in enumerate(words[winsize:-winsize]):
+            i = j + winsize
+            ns.append(mean([eng_vector(_, model) for _ in words[i - winsize: i]]) + eng_vector(word, model)
+                      + mean([eng_vector(_, model) for _ in  words[i + 1: i + winsize + 1]]))
+    return ns
+
+"""
 def mklsts (CORPUS, files, winsize,  word2vec, lang = 'rus'):
     WORDS, CLS = [], []
-    if lang == 'rus':
-        Ns = np.empty((0,3, word2vec.vector_size * 2 + 1))
-    else:
-        Ns = np.empty((0,3, word2vec.vector_size + 1))
+    #if lang == 'rus':
+    #    Ns = np.empty((0,3, word2vec.vector_size * 2 + 1))
+    #else:
+    #    Ns = np.empty((0,3, word2vec.vector_size + 1))
+    Ns = []
     for file in files:
 
         with open (os.path.join(CORPUS, file), 'r') as f:
@@ -82,10 +110,29 @@ def mklsts (CORPUS, files, winsize,  word2vec, lang = 'rus'):
             n = neurons(words, winsize, word2vec, lang = lang)
             WORDS.extend(words)
         CLS.extend(cls[:-1])
-        Ns = np.concatenate((Ns, n))
+        Ns.extend(n)
 
+    print np.asarray(Ns).shape, len(WORDS)
+    return np.asarray(Ns),  WORDS, np.asarray(CLS, dtype = 'int32')
+"""
 
-    return Ns,  WORDS, np.asarray(CLS, dtype = 'int32')
+def mklsts (CORPUS, files, winsize):
+    WORDS, CLS = [], []
+    for file in files:
+
+        with open (os.path.join(CORPUS, file), 'r') as f:
+            words,cls = [], []
+            reader = csv.reader(f, delimiter = '\t')
+            for row in reader:
+                words.append(row[0].decode('utf-8'))
+                cls.append(int(row[1]))
+        cls.extend([0] *  (winsize - 1))
+        WORDS.extend(words)
+        WORDS.extend(['<fullstop>'] * (winsize - 1))
+        CLS.extend(cls)
+
+    print len(WORDS), np.asarray(CLS, dtype = 'int32').shape
+    return WORDS, np.asarray(CLS, dtype = 'int32')
 
 
 def  get_tokens(text): #split to tokens
@@ -155,15 +202,38 @@ def build_mlp(shape, input_var=None):
         nonlinearity=lasagne.nonlinearities.softmax)
     return network
 
-def iterate_minibatches(inputs, targets, batchsize, shuffle=False):
+def gen_data(words, indices, winsize, model, lang = 'rus'):
+    #print 'gen_data'
 
+    words = [u'<fullstop>'] * winsize + words
+    ns = []
+    if lang == 'rus':
+        for j in indices:
+            i = j + winsize
+
+            ns.append(mean([rus_vector(_, model) for _ in words[i - winsize: i]]) + rus_vector(words[i], model)
+                      + mean([rus_vector(_, model) for _ in  words[i + 1: i + winsize + 1]]))
+    else:
+        for j in indices:
+            i = j + winsize
+
+            ns.append(mean([eng_vector(_, model) for _ in words[i - winsize: i]]) + eng_vector(words[i], model)
+                      + mean([eng_vector(_, model) for _ in  words[i + 1: i + winsize + 1]]))
+    #print 'return ns'
+    return ns
+
+
+def iterate_minibatches(inputs, targets, batchsize, model, lang = 'rus', winsize = 1, shuffle=False):
+    print len(inputs), len(targets)
     assert len(inputs) == len(targets)
+    print batchsize
     if shuffle:
-        indices = np.arange(len(inputs))
+        indices = np.arange(len(inputs) - winsize)
         np.random.shuffle(indices)
     for start_idx in range(0, len(inputs) - batchsize + 1, batchsize):
         if shuffle:
             excerpt = indices[start_idx:start_idx + batchsize]
         else:
             excerpt = slice(start_idx, start_idx + batchsize)
-        yield inputs[excerpt], targets[excerpt]
+
+        yield gen_data(inputs,excerpt,  winsize, model, lang = lang), targets[excerpt]

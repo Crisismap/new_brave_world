@@ -15,11 +15,13 @@ import pydot_ng as pydot
 
 
 class Engine(object):
-    def __init__(self,  input_var, network_creator, args, target_var = None, model = None ):
+    def __init__(self,  input_var, network_creator, args, word2vec, lang, target_var = None, model = None ):
         self.network = network_creator(args, input_var)
         self.fitted = False
         self.input_var = input_var# T.dtensor3('inputs')
         self.target_var = target_var# T.ivector('targets')
+        self.word2vec = word2vec
+        self.lang = lang
         print self.target_var
         if not self.target_var is None:
             self.prediction = lasagne.layers.get_output(self.network)
@@ -54,7 +56,7 @@ class Engine(object):
                 train_err = 0
                 train_batches = 0
                 start_time = time.time()
-                for batch in data.iterate_minibatches(X_train, y_train,  100, shuffle=True):
+                for batch in data.iterate_minibatches(X_train, y_train,  100, self.word2vec, lang = self.lang, winsize = 1, shuffle=True):
                     inputs, targets = batch
 
                     train_err += self.train_fn(inputs, targets)
