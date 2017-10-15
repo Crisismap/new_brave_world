@@ -1,13 +1,10 @@
 #-*- coding: UTF-8 -*-
 
 import os
-from math import cos, sin, radians
 from argparse import ArgumentParser
 import datetime as dt
 import numpy as np
 import pandas as pd
-from pandas import DataFrame
-import scipy.cluster.hierarchy as hcluster
 import geocoder
 import time
 import cPickle as pickle
@@ -26,46 +23,28 @@ def handle_args():
     args = parser.parse_args()
     return args
 
-#geocod = 'google'
-
-coordinates = {} # get cached
-toponyms = {} # get cached
-
-#print coder ('Хакасия').geojson #.latlng
+coordinates = {}
 from ..toponyms.top import extract_toponyms
-
-
 
 files = os.listdir(os.curdir)
 if 'coordinates' in files:
-    #with open ('coordinates', 'r') as file:
     with open ('new_brave_world/experiments/coordinates', 'r') as file:
-
         coordinates = pickle.load(file)
-#ort dbm
-#coordinates = dbm.open()
 
 def geolocate(toponyms , geocod):
     coder = getattr(geocoder, geocod)
     locations = []
     for toponym in toponyms:
-        #print toponym
         if toponym in coordinates.keys():
             location = coordinates[toponym]
         else:
-            location = coder(toponym).geojson #.latlng
-            #print location.geojson['properties']['status']
-            #print 'going to bed...'
+            location = coder(toponym).geojson
             if location['properties']['status'] == 'OVER_QUERY_LIMIT':
                 print 'going to bed...'
                 time.sleep(10)
-                #print location.geojson['properties']['status']
-                location = coder(toponym).geojson #.latlng
+                location = coder(toponym).geojson
 
-        #print toponym, location
             coordinates[toponym] = location
-            #print location.geojson['properties']['status']
-        #if not location.geojson['properties']['status'] == 'ZERO_RESULTS':
         if 'lat' in  location['properties'].keys() and 'lng' in location['properties'].keys():
             locations.append((location['properties']['lat'], location['properties']['lng']))
         else:
@@ -104,32 +83,19 @@ def main():
     geocod = args.geocod
     number = int(args.number)
     random = bool(args.random)
-    print bool('False')
-    print random
 
-    #geocod = 'google'
-    #fname = 'Crisismap - all news.csv'
-    #random = False
-    #number = 100
     df = pd.read_csv(fname, sep = ';', encoding = "utf8")
     if random:
         print 'permutation'
         df = df.ix[np.random.permutation(df.index)]
     df = df[:number]
 
-
     df["text"] = df.Title.map(unicode) + df.Description.map(unicode)
-    #df.text.map(geolocate)
     df['toponyms'] = df.text.apply(lotop)
-    #df['phrases'] = ','.join (df.toponyms)
     df['points'] = df.toponyms.apply(geolocate, args = (geocod,))
     df['point'] = df.points.apply(main_point)
     df['lat'] = df.point.apply(lat)
     df['long'] = df.point.apply(long)
-
-
-
-
 
     now = dt.datetime.now().isoformat().replace(":", "_")
     result_name = "_".join([os.path.splitext(fname)[0], now , "result.csv"])
