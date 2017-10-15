@@ -23,24 +23,30 @@ def handle_args():
     args = parser.parse_args()
     return args
 
-coordinates = {}
+
 from ..toponyms.top import extract_toponyms
 
-files = os.listdir(os.curdir)
+files = os.listdir(os.path.join(os.curdir, 'new_brave_world/experiments'))
 if 'coordinates' in files:
     with open ('new_brave_world/experiments/coordinates', 'r') as file:
         coordinates = pickle.load(file)
+else:
+    coordinates = {}
+
+
 
 def geolocate(toponyms , geocod):
     coder = getattr(geocoder, geocod)
     locations = []
     for toponym in toponyms:
+
         if toponym in coordinates.keys():
             location = coordinates[toponym]
         else:
+
             location = coder(toponym).geojson
             if location['properties']['status'] == 'OVER_QUERY_LIMIT':
-                print 'going to bed...'
+                print 'im going to bed...'
                 time.sleep(10)
                 location = coder(toponym).geojson
 
@@ -99,11 +105,12 @@ def main():
 
     now = dt.datetime.now().isoformat().replace(":", "_")
     result_name = "_".join([os.path.splitext(fname)[0], now , "result.csv"])
-    columns = ["toponyms", 'lat', 'long', 'points', "pub_date", "type", "text"]
+    columns = ["toponyms", 'lat', 'long', 'Title', "Description"]
     df[columns].to_csv(result_name, encoding = "utf8", sep = "\t", index = False)
 
-    with open ('coordinates', 'w') as file:
+    with open ('new_brave_world/experiments/coordinates', 'w') as file:
         pickle.dump(coordinates, file)
+
 
 if __name__ == "__main__":
     main()
