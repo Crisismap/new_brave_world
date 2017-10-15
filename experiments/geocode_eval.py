@@ -105,7 +105,7 @@ def main():
 
     now = dt.datetime.now().isoformat().replace(":", "_")
     result_name = "_".join([os.path.splitext(fname)[0], now , "result.csv"])
-    columns = ["toponyms", 'lat', 'long', 'Title', "Description"]
+    columns = ["toponyms", 'lat', 'long', 'Title', "Description", 'points']
     df[columns].to_csv(result_name, encoding = "utf8", sep = "\t", index = False)
 
     with open ('new_brave_world/experiments/coordinates', 'w') as file:

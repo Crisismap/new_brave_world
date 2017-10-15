@@ -50,7 +50,7 @@ def extract_toponyms(text):
     predannotations = annots.setAnnotations(pred,  {1: 'Location'})  # list of annotations
     #  each one has a type (Location) and offsets (in terms of tokens)
 
-    for top in set(annots.setlabels(words,predannotations)):
+    for top in annots.setlabels(words,predannotations):
         yield top
 
 
