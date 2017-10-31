@@ -10,32 +10,18 @@ import time
 import cPickle as pickle
 
 
-
-
 def handle_args():
     parser = ArgumentParser()
-    parser.add_argument('-f', '--fname', default = 'Crisismap - all news.csv')
-    parser.add_argument('-g', '--geocod', default = 'google')
-    parser.add_argument('-n', '--number', default = 1000)
-    parser.add_argument('--random', dest= 'random', action = 'store_true')
-    parser.add_argument('--no-random', dest= 'random', action = 'store_false')
-    parser.set_defaults(random=True)
+    parser.add_argument('-f', '--fname', default='Crisismap - all news.csv')
+    parser.add_argument('-g', '--geocod', default='google')
+    parser.add_argument('-n', '--number', default=1000, type=int)
+    parser.add_argument('--random', dest='random',
+                        action='store_true', default=True)
     args = parser.parse_args()
     return args
 
 
-from ..toponyms.top import extract_toponyms
-
-files = os.listdir(os.path.join(os.curdir, 'new_brave_world/experiments'))
-if 'coordinates' in files:
-    with open ('new_brave_world/experiments/coordinates', 'r') as file:
-        coordinates = pickle.load(file)
-else:
-    coordinates = {}
-
-
-
-def geolocate(toponyms , geocod):
+def geolocate(toponyms, geocod):
     coder = getattr(geocoder, geocod)
     locations = []
     for toponym in toponyms:
@@ -51,13 +37,14 @@ def geolocate(toponyms , geocod):
                 location = coder(toponym).geojson
 
             coordinates[toponym] = location
-        if 'lat' in  location['properties'].keys() and 'lng' in location['properties'].keys():
-            locations.append((location['properties']['lat'], location['properties']['lng']))
+        if 'lat' in location['properties'].keys() and 'lng' in location['properties'].keys():
+            locations.append(
+                (location['properties']['lat'], location['properties']['lng']))
         else:
             print 'no coordinates', toponym, location['properties']['status']
 
-
     return locations
+
 
 def main_point(points):
     if len(points) > 0:
@@ -65,11 +52,13 @@ def main_point(points):
     else:
         return ''
 
+
 def lat(point):
     if len(point) > 0:
         return point[0]
     else:
         return ''
+
 
 def long(point):
     if len(point) > 0:
@@ -79,18 +68,27 @@ def long(point):
 
 
 def lotop(text):
+    from ..toponyms.top import extract_toponyms
     ts = tuple(extract_toponyms(text))
 
     return ts
+
 
 def main():
     args = handle_args()
     fname = 'new_brave_world/experiments/' + args.fname
     geocod = args.geocod
-    number = int(args.number)
-    random = bool(args.random)
+    number = args.number
+    random = args.random
 
-    df = pd.read_csv(fname, sep = ';', encoding = "utf8")
+    files = os.listdir(os.path.join(os.curdir, 'new_brave_world/experiments'))
+    if 'coordinates' in files:
+        with open('new_brave_world/experiments/coordinates', 'r') as file:
+            coordinates = pickle.load(file)
+    else:
+        coordinates = {}
+
+    df = pd.read_csv(fname, sep=';', encoding="utf8")
     if random:
         print 'permutation'
         df = df.ix[np.random.permutation(df.index)]
@@ -98,19 +96,19 @@ def main():
 
     df["text"] = df.Title.map(unicode) + df.Description.map(unicode)
     df['toponyms'] = df.text.apply(lotop)
-    df['points'] = df.toponyms.apply(geolocate, args = (geocod,))
+    df['points'] = df.toponyms.apply(geolocate, args=(geocod,))
     df['point'] = df.points.apply(main_point)
     df['lat'] = df.point.apply(lat)
     df['long'] = df.point.apply(long)
 
     now = dt.datetime.now().isoformat().replace(":", "_")
-    result_name = "_".join([os.path.splitext(fname)[0], now , "result.csv"])
+    result_name = "_".join([os.path.splitext(fname)[0], now, "result.csv"])
     columns = ["toponyms", 'lat', 'long', 'Title', "Description", 'points']
-    df[columns].to_csv(result_name, encoding = "utf8", sep = "\t", index = False)
+    df[columns].to_csv(result_name, encoding="utf8", sep="\t", index=False)
 
-    with open ('new_brave_world/experiments/coordinates', 'w') as file:
+    with open('new_brave_world/experiments/coordinates', 'w') as file:
         pickle.dump(coordinates, file)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
