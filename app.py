@@ -7,7 +7,7 @@ from flask_migrate import Migrate
 from flask_bootstrap import Bootstrap
 
 import logging
-logging.basicConfig(filename='crisismap.log',level=logging.DEBUG, format='%(asctime)s\t%(levelname)s\t%(filename)s\t%(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s\t%(levelname)s\t%(filename)s\t%(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 SQLITE_PREFIX = "sqlite:///" 
