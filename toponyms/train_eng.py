@@ -26,7 +26,7 @@ path = os.path.abspath(__file__)
 cwd = os.path.dirname(path)
 def main(shape, model='mlp', num_epochs=100):
 
-    files = os.listdir(CORPUS)
+    files = sorted(os.listdir(CORPUS))#[:100]
     random.shuffle(files)
 
     X_train,  y_train = data.mklsts(CORPUS, files, winsize)#, word2vec_model, lang = 'eng')

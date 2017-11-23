@@ -4,22 +4,68 @@ import numpy as np
 import os,csv
 import re
 import lasagne
+import cPickle as pickle
 np.set_printoptions(threshold='nan')
 
 morph = pymorphy2.MorphAnalyzer()
 
-def grammar_token(token):
-    if len(morph.parse(token)) > 0:
-        t = reduce(lambda x,y : x + '_' + str(y), sorted(morph.parse(token)[0].tag.grammemes), '')
-    else:
-        t = token
-    return t
+path = os.path.abspath(__file__)
+cwd = os.path.dirname(path)
 
-def normal_form (token):
-    if len(morph.parse(token)) > 0:
-        return morph.parse(token)[0].normal_form
+
+with open (os.path.join(cwd,'rus_gazeteers'), 'r') as fin:
+    rus_gazeteers = pickle.load(fin)
+
+
+
+rus_gazeteers_keys = set(rus_gazeteers.keys())
+
+with open (os.path.join(cwd,'eng_gazeteers'), 'r') as fin:
+    eng_gazeteers = pickle.load(fin)
+
+eng_gazeteers_keys = set(eng_gazeteers.keys())
+
+if os.path.exists('models/parses.dict'):
+    with open ('models/parses.dict') as file:
+        parses = pickle.load(file)
+else:
+    parses = dict()
+
+
+def norm_gram(token):
+    parse = morph.parse(token)
+    if len(parse) > 0:
+        return (parse[0].normal_form, reduce(lambda x,y : x + '_' + str(y), sorted(parse[0].tag.grammemes), ''))
     else:
-        return token
+        return (token,'zero')
+
+
+"""
+def normal_form (token):
+    if token in parses.keys():
+        return parses[token][0]
+    else:
+        parse = morph.parse(token)
+        if len(parse) > 0:
+            nf = parse[0].normal_form
+            t = reduce(lambda x,y : x + '_' + str(y), sorted(parse[0].tag.grammemes), '')
+            parses[token] = (nf, t)
+            return nf
+        else:
+            #parses[token] = (token, 'zero')
+            parses[token] = (token, token)
+
+            return token
+
+
+def grammar_token(token):
+    return parses[token][0]
+    #if len(morph.parse(token)) > 0:
+    #    t = reduce(lambda x,y : x + '_' + str(y), sorted(morph.parse(token)[0].tag.grammemes), '')
+    #else:
+    #    t = 't' #token
+    #return t
+"""
 
 def iscap(word):
     capitalised = False
@@ -33,19 +79,28 @@ def iscap(word):
     return capitalised
 
 def rus_vector(word, model):
-    if normal_form(word)  in model.vocab and grammar_token(word) in model.vocab:
+    #print word, word in rus_gazeteers.keys(), rus_gazeteers[word]
+    #word1 = int(word in rus_gazeteers_keys) and ('1' in rus_gazeteers[word])
+    #word2 = int(word in rus_gazeteers_keys) and ('2' in rus_gazeteers[word])
+    #print word, word1, word2
+    #normal, grammar = normal_form(word), grammar_token(word)
+    (normal, grammar) = norm_gram(word)
+    if normal  in model.vocab and grammar in model.vocab:
 
-        return list(model[normal_form(word)]) + list(model[grammar_token(word)]) + [iscap(word)]
-    elif grammar_token(word) in model.vocab:
-        return list(model['unk']) + list(model[grammar_token(word)]) +  [iscap(word)]
+        return list(model[normal]) + list(model[grammar]) + [iscap(word),]# word1, word2]
+    elif grammar in model.vocab:
+        return list(model['unk']) + list(model[grammar]) +  [iscap(word),]# word1, word2]
     else:
-        return list(model['unk']) + [0] * model.vector_size + [iscap(word)]
+        return list(model['unk']) + [0] * model.vector_size + [iscap(word),]# word1, word2]
 
 def eng_vector(word, model):
-    if word.lower()  in model.vocab :
-        return list(model[word.lower()]) +  [iscap(word)]
+    #word1 = int(word in eng_gazeteers_keys)and ('1' in eng_gazeteers[word])
+    #word2 = int(word in eng_gazeteers_keys) and ('2' in eng_gazeteers[word])
+
+    if word.lower()  in model.vocab:
+        return list(model[word.lower()]) + [iscap(word),]# word1, word2]
     else:
-        return list(model['unk']) + [iscap(word)]
+        return list(model['unk']) + [iscap(word),]# word1, word2]
 
 """
 def neurons(words, winsize, model, lang = 'rus'):
@@ -119,7 +174,7 @@ def mklsts (CORPUS, files, winsize,  word2vec, lang = 'rus'):
 def mklsts (CORPUS, files, winsize):
     WORDS, CLS = [], []
     for file in files:
-
+        #print file
         with open (os.path.join(CORPUS, file), 'r') as f:
             words,cls = [], []
             reader = csv.reader(f, delimiter = '\t')
@@ -224,9 +279,7 @@ def gen_data(words, indices, winsize, model, lang = 'rus'):
 
 
 def iterate_minibatches(inputs, targets, batchsize, model, lang = 'rus', winsize = 1, shuffle=False):
-    print len(inputs), len(targets)
     assert len(inputs) == len(targets)
-    print batchsize
     if shuffle:
         indices = np.arange(len(inputs) - winsize)
         np.random.shuffle(indices)

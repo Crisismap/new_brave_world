@@ -37,14 +37,14 @@ class Engine(object):
         #theano.printing.pydotprint(self.predict_fn, outfile='examples/mlp.png', var_with_name_simple=True)
 
         if not model is None:
-            try:
+            #try:
                 self.fitted = True
                 self.model = model
                 with np.load(self.model) as f:
                     param_values = [f['arr_%d' % i] for i in range(len(f.files))]
                     lasagne.layers.set_all_param_values(self.network, param_values)
-            except:
-                 raise  NetworkException('network and model do not match!')
+            #except:
+            #     raise  NetworkException('network and model do not match!')
 
 
 

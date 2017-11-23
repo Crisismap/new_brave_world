@@ -25,8 +25,7 @@ cwd = os.path.dirname(path)
 
 def main(shape, num_epochs=100):
     print 'main'
-    print len(os.listdir(CORPUS))
-    files = os.listdir(CORPUS) #[:150]
+    files = sorted(os.listdir(CORPUS)) #[:10000]
     random.shuffle(files)
     print 'getting data'
     #train data + evaluation data
@@ -41,10 +40,10 @@ def main(shape, num_epochs=100):
     print 'fit'
     engine.fit(X_train, y_train, num_epochs)
     np.savez(os.path.join(cwd,'models/model-rus.npz') , *lasagne.layers.get_all_param_values(engine.network))
+    with open('models/parses.dict', 'w') as file:
+        data.pickle.dump(file, data.parses)
 
     print 'model saved'
-
-
 
 if __name__ == '__main__':
     main(((None,3 * (word2vec_model.vector_size * 2 + 1)), 300), num_epochs = 100)
