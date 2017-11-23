@@ -1,8 +1,7 @@
 #-*- coding: UTF-8 -*-
 
 import os
-from gensim.models import word2vec
-import gensim
+from gensim.models import KeyedVectors
 
 import annots
 
