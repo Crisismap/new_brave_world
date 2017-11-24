@@ -21,7 +21,7 @@ def handle_args():
     return args
 
 
-def geolocate(toponyms, geocod):
+def geolocate(toponyms, geocod, coordinates):
     coder = getattr(geocoder, geocod)
     locations = []
     for toponym in toponyms:
@@ -96,7 +96,7 @@ def main():
 
     df["text"] = df.Title.map(unicode) + df.Description.map(unicode)
     df['toponyms'] = df.text.apply(lotop)
-    df['points'] = df.toponyms.apply(geolocate, args=(geocod,))
+    df['points'] = df.toponyms.apply(geolocate, args=(geocod,coordinates))
     df['point'] = df.points.apply(main_point)
     df['lat'] = df.point.apply(lat)
     df['long'] = df.point.apply(long)
