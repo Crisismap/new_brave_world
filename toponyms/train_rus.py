@@ -40,8 +40,6 @@ def main(shape, num_epochs=100):
     print 'fit'
     engine.fit(X_train, y_train, num_epochs)
     np.savez(os.path.join(cwd,'models/model-rus.npz') , *lasagne.layers.get_all_param_values(engine.network))
-    with open('models/parses.dict', 'w') as file:
-        data.pickle.dump(file, data.parses)
 
     print 'model saved'
 

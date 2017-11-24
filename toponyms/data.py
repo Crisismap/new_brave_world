@@ -12,26 +12,6 @@ morph = pymorphy2.MorphAnalyzer()
 path = os.path.abspath(__file__)
 cwd = os.path.dirname(path)
 
-
-with open (os.path.join(cwd,'rus_gazeteers'), 'r') as fin:
-    rus_gazeteers = pickle.load(fin)
-
-
-
-rus_gazeteers_keys = set(rus_gazeteers.keys())
-
-with open (os.path.join(cwd,'eng_gazeteers'), 'r') as fin:
-    eng_gazeteers = pickle.load(fin)
-
-eng_gazeteers_keys = set(eng_gazeteers.keys())
-
-if os.path.exists('models/parses.dict'):
-    with open ('models/parses.dict') as file:
-        parses = pickle.load(file)
-else:
-    parses = dict()
-
-
 def norm_gram(token):
     parse = morph.parse(token)
     if len(parse) > 0:
@@ -40,32 +20,6 @@ def norm_gram(token):
         return (token,'zero')
 
 
-"""
-def normal_form (token):
-    if token in parses.keys():
-        return parses[token][0]
-    else:
-        parse = morph.parse(token)
-        if len(parse) > 0:
-            nf = parse[0].normal_form
-            t = reduce(lambda x,y : x + '_' + str(y), sorted(parse[0].tag.grammemes), '')
-            parses[token] = (nf, t)
-            return nf
-        else:
-            #parses[token] = (token, 'zero')
-            parses[token] = (token, token)
-
-            return token
-
-
-def grammar_token(token):
-    return parses[token][0]
-    #if len(morph.parse(token)) > 0:
-    #    t = reduce(lambda x,y : x + '_' + str(y), sorted(morph.parse(token)[0].tag.grammemes), '')
-    #else:
-    #    t = 't' #token
-    #return t
-"""
 
 def iscap(word):
     capitalised = False
@@ -79,11 +33,6 @@ def iscap(word):
     return capitalised
 
 def rus_vector(word, model):
-    #print word, word in rus_gazeteers.keys(), rus_gazeteers[word]
-    #word1 = int(word in rus_gazeteers_keys) and ('1' in rus_gazeteers[word])
-    #word2 = int(word in rus_gazeteers_keys) and ('2' in rus_gazeteers[word])
-    #print word, word1, word2
-    #normal, grammar = normal_form(word), grammar_token(word)
     (normal, grammar) = norm_gram(word)
     if normal  in model.vocab and grammar in model.vocab:
 
@@ -94,39 +43,12 @@ def rus_vector(word, model):
         return list(model['unk']) + [0] * model.vector_size + [iscap(word),]# word1, word2]
 
 def eng_vector(word, model):
-    #word1 = int(word in eng_gazeteers_keys)and ('1' in eng_gazeteers[word])
-    #word2 = int(word in eng_gazeteers_keys) and ('2' in eng_gazeteers[word])
-
     if word.lower()  in model.vocab:
         return list(model[word.lower()]) + [iscap(word),]# word1, word2]
     else:
         return list(model['unk']) + [iscap(word),]# word1, word2]
 
-"""
-def neurons(words, winsize, model, lang = 'rus'):
-    l = len(words)
-
-    words = [u'<fullstop>'] * winsize + words[:-1] + [u'<fullstop>'] * winsize
-    if lang == 'rus':
-
-        ns = np.zeros((l - 1, 3, (model.vector_size * 2 + 1)))
-        for i in xrange(winsize, l + winsize - 1):
-
-
-            ns[i - winsize, :, :] = np.vstack((np.mean(tuple(rus_vector(_, model) for _ in  words[i - winsize: i]), axis = 0), rus_vector(words[i], model),
-                                                       np.mean(tuple(rus_vector(_, model) for _ in  words[i + 1: i + winsize + 1]), axis = 0)))
-    else:
-        ns = np.empty((l - 1, 3, (model.vector_size + 1)))
-        for i in xrange(winsize, l + winsize - 1):
-            ns[i - winsize, :, :] = np.vstack((np.mean(tuple(eng_vector(_, model) for _ in  words[i - winsize: i]), axis = 0), eng_vector(words[i], model),
-                                                       np.mean(tuple(eng_vector(_, model) for _ in  words[i + 1: i + winsize + 1]), axis = 0)))
-    return ns
-"""
 def mean(listoflists):
-    #l = len(listoflists[0])
-
-    #s  = [sum (_[i] for _ in listoflists) / l for i in xrange(l) ]
-    #return s
     return listoflists[0]
 
 
@@ -145,31 +67,6 @@ def neurons(words, winsize, model, lang = 'rus'):
             ns.append(mean([eng_vector(_, model) for _ in words[i - winsize: i]]) + eng_vector(word, model)
                       + mean([eng_vector(_, model) for _ in  words[i + 1: i + winsize + 1]]))
     return ns
-
-"""
-def mklsts (CORPUS, files, winsize,  word2vec, lang = 'rus'):
-    WORDS, CLS = [], []
-    #if lang == 'rus':
-    #    Ns = np.empty((0,3, word2vec.vector_size * 2 + 1))
-    #else:
-    #    Ns = np.empty((0,3, word2vec.vector_size + 1))
-    Ns = []
-    for file in files:
-
-        with open (os.path.join(CORPUS, file), 'r') as f:
-            words,cls = [], []
-            reader = csv.reader(f, delimiter = '\t')
-            for row in reader:
-                words.append(row[0].decode('utf-8'))
-                cls.append(int(row[1]))
-            n = neurons(words, winsize, word2vec, lang = lang)
-            WORDS.extend(words)
-        CLS.extend(cls[:-1])
-        Ns.extend(n)
-
-    print np.asarray(Ns).shape, len(WORDS)
-    return np.asarray(Ns),  WORDS, np.asarray(CLS, dtype = 'int32')
-"""
 
 def mklsts (CORPUS, files, winsize):
     WORDS, CLS = [], []
