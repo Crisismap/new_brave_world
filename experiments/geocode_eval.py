@@ -14,7 +14,7 @@ def handle_args():
     parser = ArgumentParser()
     parser.add_argument('-f', '--fname', default='crisismap_with_toponyms.csv')
     parser.add_argument('-g', '--geocod', default='google')
-    parser.add_argument('-n', '--number', default=10, type=int)
+    parser.add_argument('-n', '--number', default=1000, type=int)
     parser.add_argument('--random', dest='random',
                         action='store_true', default=True)
     parser.add_argument('--no-random', dest= 'random', action = 'store_false')
