@@ -22,7 +22,7 @@ class Engine(object):
         self.target_var = target_var# T.ivector('targets')
         self.word2vec = word2vec
         self.lang = lang
-        print self.target_var
+
         if not self.target_var is None:
             self.prediction = lasagne.layers.get_output(self.network)
             self.loss = lasagne.objectives.categorical_crossentropy(self.prediction, self.target_var).mean() + 1e-4 * lasagne.regularization.regularize_network_params(

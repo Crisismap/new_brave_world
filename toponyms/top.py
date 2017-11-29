@@ -6,7 +6,7 @@ from gensim.models import KeyedVectors
 import annots
 
 import pymorphy2
-import geocoder
+
 from classifier import *
 morph = pymorphy2.MorphAnalyzer()
 
@@ -22,9 +22,9 @@ def iseng(text):
 
 #word2vec models
 
-eng_word2vec_model = gensim.models.KeyedVectors.load_word2vec_format(os.path.join(cwd, 'word2vec/wiki-100.model'),
+eng_word2vec_model = KeyedVectors.load_word2vec_format(os.path.join(cwd, 'word2vec/wiki-100.model'),
                                                             binary=False)
-rus_word2vec_model = gensim.models.KeyedVectors.load_word2vec_format(os.path.join(cwd,'word2vec/100-sg-hs-joint.model'),
+rus_word2vec_model = KeyedVectors.load_word2vec_format(os.path.join(cwd,'word2vec/100-sg-hs-joint.model'),
                                                             binary=False)
 # trained models
 eng_model = os.path.join(cwd,'models/model-eng.npz')
@@ -39,32 +39,13 @@ eng_engine = Engine(input_var, data.build_mlp, ((None, 303),150), eng_word2vec_m
 def extract_toponyms(text):
 
     words = data.get_tokens(text)
-    #print ' '.join(words).encode('utf-8')
     if iseng(text):
-        nn = data.neurons(words, 2, eng_word2vec_model, lang = 'eng')
+        nn = data.neurons(words, 1, eng_word2vec_model, lang = 'eng')
         pred = eng_engine.predict(nn)
-        for word, cls in zip(words, pred):
-            if word in data.rus_gazeteers_keys:
-                data.rus_gazeteers[word].add(cls)
-
     else:
         nn = data.neurons(words, 1, rus_word2vec_model)
         pred = ru_engine.predict(nn)
-        for word, cls in zip(words, pred):
-            if word in data.eng_gazeteers_keys:
-                data.eng_gazeteers[word].add(cls)
-
-
-#    for word, cls in zip(words, pred):
-#        if word in data.rus_gazeteers_keys() and (cls == '1' or cls == '2'):
-#            data.rus_gazeteers[word].add(cls)
-#        elif cls == '1' or cls == '2':
-#            data.rus_gazeteers_keys.add(word)
-#            data.rus_gazeteers[word] = cls
-
     predannotations = annots.setAnnotations(pred,  {1: 'Location'})  # list of annotations
-    #  each one has a type (Location) and offsets (in terms of tokens)
-
     for top in annots.setlabels(words,predannotations):
         yield top
 

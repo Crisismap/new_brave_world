@@ -53,9 +53,11 @@ def mean(listoflists):
 
 
 def neurons(words, winsize, model, lang = 'rus'):
-    words = [u'<fullstop>'] * winsize + words[:-1] + [u'<fullstop>'] * winsize
+    #words = [u'<fullstop>'] * winsize + words[:-1] + [u'<fullstop>'] * winsize
+    words = [u'<fullstop>'] * winsize + words  + [u'<fullstop>'] * winsize
     ns = []
     if lang == 'rus':
+
         for j, word in enumerate(words[winsize:-winsize]):
             i = j + winsize
 
@@ -71,7 +73,7 @@ def neurons(words, winsize, model, lang = 'rus'):
 def mklsts (CORPUS, files, winsize):
     WORDS, CLS = [], []
     for file in files:
-        #print file
+
         with open (os.path.join(CORPUS, file), 'r') as f:
             words,cls = [], []
             reader = csv.reader(f, delimiter = '\t')
@@ -93,7 +95,7 @@ def  get_tokens(text): #split to tokens
     text = re.sub(ur'([\-])([йцукенгшщзхъфывапролджэячсмитьбю0-9a-z]+)', ur' \1 \2', text)
     #split to sentences
     text = re.sub(ur'[ <>\[\]]', ' ', text)#
-    text = re.sub(ur',[ ]*([.!?]+)', ur'<fullstop>', text)
+    text = re.sub(ur',[ ]*([.!?]+)', ur' <fullstop>', text)
     text = re.sub(ur'([^ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮA-Z])([.!?]+)[ \n]+([ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮA-Z])',ur'\1 <fullstop> \3', text)
     text = re.sub(ur'([^ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮA-Z])([.!?]+)[ ]*$',ur'\1 <fullstop> ', text)
     text = re.sub(ur'([ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮA-Z]+[ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮA-Z]+)([.!?]+)', ur'\1 <fullstop>', text)
@@ -101,6 +103,7 @@ def  get_tokens(text): #split to tokens
     text = re.sub(ur'([йцукеншгщзхъфывапролджэячсмитьбюЦЙУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ0-9a-zA-Z\+])(["»„\)])', ur'\1 \2', text)
     text = re.sub(ur'([\(“"«])([йцукеншгщзхъфывапролджэячсмитьбюЦЙУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ0-9a-z-A-Z\+])', ur'\1 \2', text)
     text = re.sub(ur'[ ]+', ' ', text)
+
     words = text.split()
     return words
 
@@ -155,9 +158,7 @@ def build_mlp(shape, input_var=None):
     return network
 
 def gen_data(words, indices, winsize, model, lang = 'rus'):
-    #print 'gen_data'
-
-    words = [u'<fullstop>'] * winsize + words
+    words = [u'<fullstop>'] * winsize + words #+ [u'<fullstop>'] * (winsize - 1)
     ns = []
     if lang == 'rus':
         for j in indices:
@@ -171,7 +172,6 @@ def gen_data(words, indices, winsize, model, lang = 'rus'):
 
             ns.append(mean([eng_vector(_, model) for _ in words[i - winsize: i]]) + eng_vector(words[i], model)
                       + mean([eng_vector(_, model) for _ in  words[i + 1: i + winsize + 1]]))
-    #print 'return ns'
     return ns
 
 
