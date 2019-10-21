@@ -19,7 +19,7 @@ Jinja2==2.9.6
 MarkupSafe==1.0
 matplotlib==2.0.2
 networkx==2.0
-nltk==3.2.4
+nltk==3.4.5
 git+https://github.com/Lasagne/Lasagne.git@359ea1b
 numpy==1.13.1
 orderedset==2.0
