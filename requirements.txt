@@ -15,7 +15,7 @@ gpxpy==1.1.2
 graphviz==0.8
 idna==2.5
 itsdangerous==0.24
-Jinja2==2.9.6
+Jinja2==2.11.3
 MarkupSafe==1.0
 matplotlib==2.0.2
 networkx==2.0
