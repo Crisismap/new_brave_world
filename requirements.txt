@@ -21,7 +21,7 @@ matplotlib==2.0.2
 networkx==2.0
 nltk==3.2.4
 git+https://github.com/Lasagne/Lasagne.git@359ea1b
-numpy==1.13.1
+numpy==1.21.0
 orderedset==2.0
 pandas==0.20.3
 pygraphviz==1.3.1
